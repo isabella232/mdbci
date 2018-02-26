@@ -10,6 +10,8 @@ require 'fileutils'
 class DestroyCommand < BaseCommand
   include ShellCommands
 
+  SUPPORTED_PROVIDERS = [LIBVIRT, VIRTUALBOX].freeze
+
   def self.synopsis
     'Destroy configuration with all artefacts or a single node.'
   end
@@ -124,7 +126,8 @@ HELP
     end
     check_command("virsh destroy #{domain_name}",
                   "Unable to destroy domain #{domain_name}")
-    result = check_command("virsh snapshot-list #{domain_name} --tree", "Unable to get list of snapshots for #{domain_name}")
+    result = check_command("virsh snapshot-list #{domain_name} --tree",
+                           "Unable to get list of snapshots for #{domain_name}")
     result[:output].split('\n').each do |snapshot|
       next if snapshot.chomp.empty?
       check_command("virsh snapshot-delete #{domain_name} #{snapshot}",
@@ -154,7 +157,11 @@ HELP
   def execute
     return ARGUMENT_ERROR_RESULT unless check_parameters
     configuration, node = setup_command
-    stop_machines(configuration, node)
+    result = stop_machines(configuration, node)
+    if !result[:value].success? && !SUPPORTED_PROVIDERS.include?(configuration.provider)
+      @ui.error("Unable to manually destroy machines for provider #{configuration.provider}")
+      return ERROR_RESULT
+    end
     if node.empty?
       configuration.node_names.each do |node_name|
         destroy_machine(configuration, node_name)

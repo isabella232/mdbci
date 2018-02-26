@@ -79,6 +79,7 @@ describe 'destroy command', :system do
       template = 'suse_13_aws_plain'
       config = mdbci_create_configuration(@test_dir, template)
       keypair = File.read("#{config}/#{Configuration::AWS_KEYPAIR_NAME}").chomp
+      mdbci_run_command("up #{config}")
       expect(mdbci_run_command("destroy #{config}")).to be_success
       result = run_command("aws ec2 describe-key-pairs --key-names '#{keypair}'")
       expect(result).not_to be_success
@@ -101,6 +102,7 @@ describe 'destroy command', :system do
 
   context 'when vagrant was unable to destroy VirtualBox machine' do
     it 'should destroy it manually' do
+      skip('Running it alongside with libvirt causes the VMs to not work')
       template = 'centos_6_vbox_plain'
       config = mdbci_create_configuration(@test_dir, template)
       mdbci_check_command("up #{config}")
@@ -110,6 +112,24 @@ describe 'destroy command', :system do
       vbox_name = "#{template}_node"
       result = run_command("VBoxManage showvminfo #{vbox_name}")
       expect(result).not_to be_success
+    end
+  end
+
+  context 'when vagrant destroy is not sucess and provider is unknown' do
+    it 'should return 0 and keep all the files' do
+      template = 'centos_7_libvirt_plain'
+      config = mdbci_create_configuration(@test_dir, template)
+      FileUtils.rm_f("#{config}/Vagrantfile")
+      FileUtils.touch("#{config}/Vagrantfile")
+      File.open("#{config}/provider", 'w') do |file|
+        file.write('unknown')
+      end
+      network_config = "#{config}#{Configuration::NETWORK_FILE_SUFFIX}"
+      FileUtils.touch(network_config)
+      result = mdbci_run_command("destroy #{config}")
+      expect(result).not_to be_success
+      expect(Dir.exist?(config)).to be_truthy
+      expect(File.exist?(network_config)).to be_truthy
     end
   end
 end
