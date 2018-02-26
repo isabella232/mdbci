@@ -2,6 +2,6 @@
   "node" :
   {
     "hostname" : "mdbcinode",
-    "box" : "suse_13_aws"
+    "box" : "centos_7_aws"
   }
 }
