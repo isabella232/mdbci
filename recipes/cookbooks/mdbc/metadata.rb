@@ -1,6 +1,6 @@
 name             'mdbc'
-maintainer       'OSLL'
-maintainer_email 'YOUR_EMAIL'
+maintainer       'MariaDB'
+maintainer_email 'maxscale@googlegroups.com'
 license          'All rights reserved'
 description      'Installs/Configures mdbc'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))

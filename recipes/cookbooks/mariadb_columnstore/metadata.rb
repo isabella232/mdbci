@@ -1,6 +1,6 @@
 name 'mariadb_columnstore'
-maintainer 'Andrey Vasilyev'
-maintainer_email ''
+maintainer 'MariaDB'
+maintainer_email 'maxscale@googlegroups.com'
 license 'All Rights Reserved'
 description 'Installs/Configures MariaDB ColumnStore'
 long_description 'Installs/Configures MariaDB ColumnStore'

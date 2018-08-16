@@ -1,6 +1,6 @@
 name              'galera'
-maintainer        'OSLL'
-maintainer_email  'kirill.krinkin@gmail.com'
+maintainer        'MariaDB'
+maintainer_email  'maxscale@googlegroups.com'
 license           'Apache 2.0'
 description       'Galera coockbook'
 version           '0.0.1'

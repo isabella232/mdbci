@@ -1,6 +1,6 @@
 name              'mariadb'
-maintainer        'MariaDB, Inc.'
-maintainer_email  'Andrey.Kuznetsov@mariadb.com'
+maintainer        'MariaDB'
+maintainer_email  'maxscale@googlegroups.com'
 license           'Apache 2.0'
 description       'MariaDB coockbook'
 version           '0.0.2'
