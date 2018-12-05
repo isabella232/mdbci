@@ -138,6 +138,7 @@ end
             + templatedef + "\n"\
             + "\t"+name+'.vm.provider :libvirt do |qemu|' + "\n" \
             + "\t\t"+'qemu.driver = ' + quote('kvm') + "\n" \
+            + "\t\t"+'qemu.cpus = ' + quote('2') + "\n" \
             + "\t\t"+'qemu.memory = ' + vm_mem + "\n\tend"
     qemudef += "\nend #  <-- End of Qemu definition for machine: " + name +"\n\n"
     return qemudef
