@@ -11,6 +11,8 @@ class MachineConfigurator
   # installed old version of the Chef, the installation is performed at the second attempt
   CHEF_INSTALLATION_ATTEMPTS = 2
 
+  DEFAULT_CHEF_VERSION = '14.12.9'
+
   def initialize(logger, root_path = File.expand_path('../../../recipes', __FILE__))
     @log = logger
     @root_path = root_path
@@ -28,7 +30,8 @@ class MachineConfigurator
   # extra files into the provision directory making runtime configuration of Chef scripts possible.
   # @param extra_files [Array<Array<String>>] pairs of source and target paths.
   # @param logger [Out] logger to log information to
-  def configure(machine, config_name, logger = @log, extra_files = [], sudo_password = '', chef_version = '14.7.17')
+  def configure(machine, config_name, logger = @log, extra_files = [], sudo_password = '',
+                chef_version = DEFAULT_CHEF_VERSION)
     logger.info("Configuring machine #{machine['network']} with #{config_name}")
     within_ssh_session(machine) do |connection|
       install_chef_on_server(connection, sudo_password, chef_version, logger)
@@ -125,7 +128,8 @@ class MachineConfigurator
                              "bash install.sh -v #{chef_version}"
                            else
                              'bash install.sh -l '\
-                             'https://packages.chef.io/files/stable/chef/14.7.17/sles/12/chef-14.7.17-1.sles12.x86_64.rpm'
+                             "https://packages.chef.io/files/stable/chef/#{chef_version}/"\
+                             "sles/15/chef-#{chef_version}-1.sles12.x86_64.rpm"
                            end
     CHEF_INSTALLATION_ATTEMPTS.times do
       break if chef_installed?(connection, chef_version, logger)
