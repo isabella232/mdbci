@@ -4,6 +4,7 @@ require 'date'
 require 'socket'
 require 'erb'
 require_relative '../../models/result'
+require_relative '../../services/cloud_services'
 
 # The class generates the Terraform infrastructure file for AWS provider
 class TerraformAwsGenerator
@@ -13,8 +14,9 @@ class TerraformAwsGenerator
   # @param logger [Out] logger
   # @param configuration_path [String] path to directory of generated configuration
   # @param ssh_keys [Hash] ssh keys info in format { public_key_value, private_key_file_path }
+  # @param aws_service [AwsService] AWS Service
   # @return [Result::Base] generation result.
-  def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys)
+  def initialize(configuration_id, aws_config, logger, configuration_path, ssh_keys, aws_service)
     @configuration_id = configuration_id
     @configuration_tags = { configuration_id: @configuration_id }
     @aws_config = aws_config
@@ -22,6 +24,7 @@ class TerraformAwsGenerator
     @configuration_path = configuration_path
     @public_key_value = ssh_keys[:public_key_value]
     @private_key_file_path = ssh_keys[:private_key_file_path]
+    @aws_service = aws_service
   end
 
   # Generate a Terraform configuration file.
@@ -37,22 +40,25 @@ class TerraformAwsGenerator
     file = File.open(configuration_file_path, 'w')
     file.puts(file_header)
     file.puts(provider_resource)
+    result = Result.ok('')
     node_params.each do |node|
-      print_node_info(node)
-      file.puts(generate_node_definition(node))
-      if node[:vpc]
-        need_vpc = true
-      else
-        need_standard_security_group = true
+      result = generate_instance_params(node).and_then do |instance_params|
+        print_node_info(instance_params)
+        file.puts(instance_resources(instance_params))
+        need_vpc ||= node[:vpc] == 'true'
+        need_standard_security_group ||= node[:vpc] != 'true'
+        Result.ok('')
       end
+      break if result.error?
     end
     file.puts(security_group_resource) if need_standard_security_group
     file.puts(vpc_resources) if need_vpc
-    file.close
   rescue Errno::ENOENT => e
     Result.error(e.message)
   else
-    Result.ok('')
+    result
+  ensure
+    file.close unless file.nil? || file.closed?
   end
   # rubocop:enable Metrics/MethodLength
 
@@ -74,7 +80,8 @@ class TerraformAwsGenerator
   #
   # @param node_params [Hash] list of the node parameters
   def print_node_info(node_params)
-    @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]}, user:#{node_params[:user]}")
+    @ui.info("AWS definition for host:#{node_params[:host]}, ami:#{node_params[:ami]},"\
+             " user:#{node_params[:user]}, instance_type:#{node_params[:machine_type]}")
   end
 
   def file_header
@@ -210,11 +217,10 @@ class TerraformAwsGenerator
   def instance_resources(node_params)
     connection_block = connection_partial(node_params[:user])
     tags_block = tags_partial(node_params[:tags])
-    key_file = @private_key_file_path
     template = ERB.new <<-AWS
     resource "aws_instance" "<%= name %>" {
       ami = "<%= ami %>"
-      instance_type = "<%= default_instance_type %>"
+      instance_type = "<%= machine_type %>"
       key_name = aws_key_pair.ec2key.key_name
       <% if vpc %>
         vpc_security_group_ids = [aws_security_group.security_group_vpc.id]
@@ -276,14 +282,20 @@ class TerraformAwsGenerator
     KEY_PAIR_RESOURCE
   end
 
-  # Generate a node definition for the configuration file.
+  # Generate a instance params for the configuration file.
   # @param node_params [Hash] list of the node parameters
-  # @return [String] node definition for the configuration file.
-  def generate_node_definition(node_params)
+  # @return [Result::Base] instance params
+  def generate_instance_params(node_params)
     tags = @configuration_tags.merge(hostname: Socket.gethostname,
                                      username: Etc.getlogin,
                                      machinename: node_params[:name],
                                      full_config_path: @configuration_path)
-    instance_resources(node_params.merge(tags: tags))
+    node_params = node_params.merge({ tags: tags, key_file: @private_key_file_path })
+    ami_info =  @aws_service.describe_ami(node_params[:ami])
+    machine_types_list = @aws_service.machine_types_list(ami_info[:architecture],
+                                                         ami_info[:root_device_type], false)
+    CloudServices
+        .choose_instance_type(machine_types_list, node_params)
+        .and_then { |machine_type| Result.ok(node_params.merge({ machine_type: machine_type })) }
   end
 end

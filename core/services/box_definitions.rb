@@ -87,7 +87,7 @@ class BoxDefinitions
   end
 
   REQUIRED_KEYS = %w[provider platform platform_version].freeze
-  AWS_KEYS = %w[ami user default_instance_type].freeze
+  AWS_KEYS = %w[ami user default_machine_type default_cpu_count default_memory_size].freeze
   GCP_KEYS = %w[image default_machine_type default_cpu_count default_memory_size].freeze
   DIGITALOCEAN_KEYS = %w[image user default_machine_type default_cpu_count default_memory_size].freeze
 

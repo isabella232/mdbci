@@ -240,6 +240,37 @@ class AwsService
     found_instance.nil? ? nil : found_instance[:instance_id]
   end
 
+  # Fetch ami information .
+  # @return [Hash] image information in format { ami, architecture, root_device_type, ena_support }.
+  def describe_ami(ami)
+    return nil unless configured?
+
+    image = @client.describe_images({ image_ids: [ami] }).images.first
+    return nil if image.nil?
+
+    { ami: ami,
+      architecture: image.architecture,
+      root_device_type: image.root_device_type,
+      ena_support: image.ena_support }
+  end
+
+  # Fetch machines types list .
+  # @return [Array<Hash>] instance types in format { ram, cpu, type }.
+  def machine_types_list(architecture, root_device_type, ena_enabled)
+    return [] unless configured?
+
+    @client.describe_instance_types.instance_types.select do |instance_type|
+      instance_type.supported_root_device_types.include?(root_device_type) &&
+        instance_type.processor_info.supported_architectures.include?(architecture) &&
+          (ena_enabled && %w[supported required].include?(instance_type.network_info.ena_support) ||
+              !ena_enabled && instance_type.network_info.ena_support != 'required')
+    end.map do |instance_type|
+      { ram: instance_type.memory_info.size_in_mi_b,
+        cpu: instance_type.v_cpu_info.default_v_cpus,
+        type: instance_type.instance_type }
+    end
+  end
+
   private
 
   def tags_to_filters(tags)

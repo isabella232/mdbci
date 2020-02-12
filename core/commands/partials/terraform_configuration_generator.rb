@@ -256,8 +256,8 @@ class TerraformConfigurationGenerator < BaseCommand
   def retrieve_configuration_file_generator
     case @provider
     when 'aws'
-      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui,
-                                          @configuration_path, @ssh_keys))
+      Result.ok(TerraformAwsGenerator.new(@configuration_id, @aws_config, @ui, @configuration_path,
+                                          @ssh_keys, @env.aws_service))
     when 'gcp'
       Result.ok(TerraformGcpGenerator.new(@configuration_id, @gcp_config, @ui, @configuration_path,
                                           @ssh_keys, @env.gcp_service))

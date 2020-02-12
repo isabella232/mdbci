@@ -3,238 +3,294 @@
     "provider": "aws",
     "ami": "ami-03e3a1b55173c30c6",
     "user": "ubuntu",
-    "default_instance_type": "t3.medium",
     "platform": "ubuntu",
     "platform_version": "bionic",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "ubuntu_xenial_aws": {
     "provider": "aws",
     "ami": "ami-02fcf12d5bd33ce51",
     "user": "ubuntu",
-    "default_instance_type": "t3.medium",
     "platform": "ubuntu",
     "platform_version": "xenial",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "ubuntu_wily_aws": {
     "provider": "aws",
     "ami": "ami-57228424",
     "user": "ubuntu",
-    "default_instance_type": "m3.medium",
     "platform": "ubuntu",
-    "platform_version": "wily"
+    "platform_version": "wily",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "ubuntu_vivid_aws": {
     "provider": "aws",
     "ami": "ami-b1443fc6",
     "user": "ubuntu",
-    "default_instance_type": "m3.medium",
     "platform": "ubuntu",
-    "platform_version": "vivid"
+    "platform_version": "vivid",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "ubuntu_trusty_aws": {
     "provider": "aws",
     "ami": "ami-053ba9d62f24950f2",
     "user": "ubuntu",
-    "default_instance_type": "t3.medium",
     "platform": "ubuntu",
     "platform_version": "trusty",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "ubuntu_precise_aws": {
     "provider": "aws",
     "ami": "ami-008a5373",
     "user": "ubuntu",
-    "default_instance_type": "m1.medium",
     "platform": "ubuntu",
-    "platform_version": "precise"
+    "platform_version": "precise",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "ubuntu_yakkety_aws": {
     "provider": "aws",
     "ami": "ami-0a4d556c",
     "user": "ubuntu",
-    "default_instance_type": "m3.medium",
     "platform": "ubuntu",
-    "platform_version": "yakkety"
+    "platform_version": "yakkety",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "centos_7_aws" : {
     "provider": "aws",
     "ami": "ami-005b5c720e7b986d6",
     "user": "centos",
-    "default_instance_type": "t3.medium",
     "platform": "centos",
     "platform_version": "7",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "centos_7_aws_large" : {
     "provider": "aws",
     "ami": "ami-0b22151636799d440",
     "user": "ec2-user",
-    "default_instance_type": "m3.large",
     "platform": "centos",
-    "platform_version": "7"
+    "platform_version": "7",
+    "default_machine_type": "m3.large",
+    "default_cpu_count": "2",
+    "default_memory_size": "7500"
   },
   "centos_6_aws" : {
     "provider": "aws",
     "ami": "ami-0451e9d3427711cb1",
     "user": "centos",
-    "default_instance_type": "t2.medium",
     "platform": "centos",
     "platform_version": "6",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t2.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "1024"
   },
   "debian_jessie_aws" : {
     "provider": "aws",
     "ami": "ami-a72a7ad4",
     "user": "admin",
-    "default_instance_type": "t2.medium",
     "platform": "debian",
     "platform_version": "jessie",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t2.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "debian_squeeze_aws" : {
     "provider": "aws",
     "ami": "ami-879e4ff0",
     "user": "admin",
-    "default_instance_type": "m1.medium",
     "platform": "debian",
-    "platform_version": "squeeze"
+    "platform_version": "squeeze",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "debian_wheezy_aws" : {
     "provider": "aws",
     "ami": "ami-e7e66a90",
     "user": "admin",
-    "default_instance_type": "m1.medium",
     "platform": "debian",
-    "platform_version": "wheezy"
+    "platform_version": "wheezy",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "debian_buster_aws" : {
     "provider": "aws",
     "ami": "ami-015c88ecc51bd3239",
     "user": "admin",
-    "default_instance_type": "t3.medium",
     "platform": "debian",
     "platform_version": "buster",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "debian_stretch_aws" : {
     "provider": "aws",
     "ami": "ami-00a845a11b3d1f308",
     "user": "admin",
-    "default_instance_type": "t3.medium",
     "platform": "debian",
     "platform_version": "stretch",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "rhel_6_aws" : {
     "provider": "aws",
     "ami": "ami-f06bf389",
     "user": "ec2-user",
-    "default_instance_type": "m1.medium",
     "platform": "rhel",
     "platform_version": "6",
-    "extra_vagrant_output": "true"
+    "extra_vagrant_output": "true",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "rhel_7_aws" : {
     "provider": "aws",
     "ami": "ami-25158352",
     "user": "ec2-user",
-    "default_instance_type": "m3.medium",
     "platform": "rhel",
-    "platform_version": "7"
+    "platform_version": "7",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "rhel_8_aws" : {
     "provider": "aws",
     "ami": "ami-0219214bdee2d7451",
     "user": "ec2-user",
-    "default_instance_type": "t3.medium",
     "platform": "rhel",
     "platform_version": "8",
     "vpc": "true",
-    "configure_subscription_manager": "true"
+    "configure_subscription_manager": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "ubuntu_trusty_aws_large" : {
     "provider": "aws",
     "ami": "ami-03746875d916becc0",
     "user": "ubuntu",
-    "default_instance_type": "m5.large",
     "platform": "ubuntu",
     "platform_version": "trusty",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "m5.large",
+    "default_cpu_count": "2",
+    "default_memory_size": "8192"
   },
   "sles_11_aws" : {
     "provider": "aws",
     "ami": "ami-9a6f3ded",
     "user": "ec2-user",
-    "default_instance_type": "m1.medium",
     "platform": "sles",
-    "platform_version": "11"
+    "platform_version": "11",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "sles_12_aws" : {
     "provider": "aws",
     "ami": "ami-0d3747c7692f33308",
     "user": "ec2-user",
-    "default_instance_type": "t3.medium",
     "platform": "sles",
     "platform_version": "12",
-    "vpc": true
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "suse_15_aws" : {
     "provider": "aws",
     "ami": "ami-0f81506cab2b62029",
     "user": "ec2-user",
-    "default_instance_type": "t3.medium",
     "platform": "opensuse",
     "platform_version": "15",
-    "vpc": "true"
+    "vpc": "true",
+    "default_machine_type": "t3.medium",
+    "default_cpu_count": "2",
+    "default_memory_size": "4096"
   },
   "suse_13_aws" : {
     "provider": "aws",
     "ami": "ami-068cc47f",
     "user": "ec2-user",
-    "default_instance_type": "m1.medium",
     "platform": "suse",
-    "platform_version": "13"
+    "platform_version": "13",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "fedora_19_aws" : {
     "provider": "aws",
     "ami": "ami-34b4f043",
     "user": "fedora",
-    "default_instance_type": "m1.medium",
     "platform": "fedora",
-    "platform_version": "19"
+    "platform_version": "19",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "fedora_20_aws" : {
     "provider": "aws",
     "ami": "ami-8cb4f0fb",
     "user": "fedora",
-    "default_instance_type": "m1.medium",
     "platform": "fedora",
-    "platform_version": "20"
+    "platform_version": "20",
+    "default_machine_type": "m1.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "fedora_21_aws" : {
     "provider": "aws",
     "ami": "ami-6c44031b",
     "user": "fedora",
-    "default_instance_type": "m3.medium",
     "platform": "fedora",
-    "platform_version": "21"
+    "platform_version": "21",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "fedora_23_aws" : {
     "provider": "aws",
     "ami": "ami-252c5a52",
     "user": "fedora",
-    "default_instance_type": "m3.medium",
     "platform": "fedora",
-    "platform_version": "23"
+    "platform_version": "23",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   },
   "fedora_22_aws" : {
     "provider": "aws",
     "ami": "ami-1b97e26c",
     "user": "fedora",
-    "default_instance_type": "m3.medium",
     "platform": "fedora",
-    "platform_version": "22"
+    "platform_version": "22",
+    "default_machine_type": "m3.medium",
+    "default_cpu_count": "1",
+    "default_memory_size": "3750"
   }
 }
