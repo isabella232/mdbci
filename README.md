@@ -4,17 +4,21 @@
 
 * automatic creation of virtual machines according to the configuration template,
 * automatic and reliable deploy of MariaDB, Galera, MaxScale and other packages to the created virtual machines,
-* creation and management of virtual machine state snapshots,
+* creation and management of virtual machine state snapshots (for livbirt VMs only),
 * reliable destruction of created virtual machines.
 
+VirtualMachines created by the MDBCI are not intended for long live and are expected to be destroyed.
+
 ## Requirements
+
+MDBCI is provided as an AppImage package that can be installed on most recent platforms. The core dependencies for the application are quite small:
 
 * glibc >= 2.14
 * fuse
 * fuse-libs - additional fuse libraries for CentOS
 * libfuse2 - additional fuse libraries for Ubuntu and Debian
 
-FUSE should be installed on all linux distributions as it's required to execute AppImage file.
+FUSE should be installed on all Linux distributions as it's required to execute AppImage file.
 
 ```
 sudo apt-get install -y libfuse2 fuse
@@ -31,78 +35,83 @@ sudo addgroup fuse
 usermod -a -G fuse $(whoami)
 ```
 
-Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#troubleshooting) section for additional help.
+Check [Toubleshooting](https://docs.appimage.org/user-guide/run-appimages.html#troubleshooting) section for additional help on running AppImages.
 
 ## Architecture overview
 
 MDBCI is a tool written in Ruby programming language. In order to ease the deployment of the tool the AppImage distribution is provided. It allows to use MDBCI as a standalone executable.
 
-MDBCI uses the [Vagrant](https://www.vagrantup.com/) and a set of low-level tools to create virtual machines and reliably destroy them when the need for them is over. Currently the following Vagrant back ends are supported:
+MDBCI uses the [Terraform](https://www.terraform.io/), [Vagrant](https://www.vagrantup.com/) and a set of low-level tools to create virtual machines and reliably destroy them when the need for them is over.
 
-* [Libvirt](https://libvirt.org/) to manage kvm virtual machines,
-* Amazon EC2 virtual machines,
-* Remote boxes.
+Currently the following VM cloud providers are supported via Terraform:
+
+* Amazon EC2,
+* Google Cloud,
+* Digital Ocean.
+
+Currently the following Vagrant back ends are supported:
+
+* [Libvirt](https://libvirt.org/) to manage kvm virtual machines.
 
 MDBCI currently provides support for the following distributions:
 
-* CentOS 6, 7
-* Debian Jessie, Stretch
-* RHEL 6, 7 via AWS
-* SLES 12, 13, 15
-* Ubuntu 14.04, 16.04 and 18.04
+* CentOS 6, 7, 8;
+* RHEL 6, 7, 8;
+* SLES 12, 15;
+* Debian Stretch, Buster;
+* Ubuntu 16.04 and 18.04.
 
 MDBCI uses the [Chef](https://www.chef.io/chef/) to deploy the applications onto the virtual machines. The recipes for deployment are provided along with the tool. Currently the following applications may be installed:
 
-* MariaDB,
 * MariaDB Columnstore,
+* MariaDB Enterprise,
 * MariaDB Galera,
 * MariaDB MaxScale,
+* MariaDB Server,
 * MySQL.
 
-The list of repositories for application installation can be automatically updated.
+The list of repositories and therefore supported versions of the applications can be configured by the end user. The versions can also be automatically retrieved via a parser.
 
 In-depth architecture description is provided in the [separate document](docs/architecture.md).
 
 ## MDBCI installation
 
-MDBCI requires you to install the Libvirt in your Linux installation, install Vagrant and install required plugins.
+1. Download the latest release of the MDBCI.
+2. Make the downloaded file executable.
+3. Move it into PATH-searchable location, `/usr/local/bin` for example.
+4. Install all required dependencies by issuing `setup-dependencies` command:
 
-Dependencies installation can be performed automatically using command
+   ```bash
+mdbci setup-dependencies
+   ```
 
-```
-./mdbci setup-dependencies
-```
+This command will install Terraform, Libvirt development libraries, libvirt virtualization packages, Vagrant and its plugins for Libvirt support, as well as all the tools required in the installation process.
 
-This will install Libvirt development libraries, libvirt virtualization packages, vagrant and its plugins for Libvirt and AWS support, as well as all the tools required in the installation process.
+Current user will be added to existing libvirt groups and a new VM pool will be created.
 
-Current user will be added to existing libvirt groups and a new VM pool will bew created.
-
-During the installation you will be prompted to enter your password.
+During the installation you will be prompted to enter `sudo` password.
 
 **WARNING**: upon installation previously created libvirt VM pool named 'default' will be deleted.
 
-You can force the use of installation method for a specific Дinux distribution by passing its name to the `--force-distro` option
+You can force the use of installation method for a specific Linux distribution by passing its name to the `--force-distro` option:
 
+```bash
+mdbci setup-dependencies --force-distro CentOS
 ```
-./mdbci setup-dependencies --force-distro CentOS
-````
 
-This will only work if your distribution uses the same package manager as a chosen distribution and provides all required packages.
-Currently supports installation for Debian, Ubuntu, CentOS, RHEL.
+This will only work if your distribution uses the same package manager as a chosen distribution and provides all required packages. This command supports installation on Debian, Ubuntu, CentOS, RHEL distributions.
 
-To perform a clean installation call
+To perform a clean installation call `setup-dependencies` with `--reinstall` option:
 
+```bash
+mdbci setup-dependencies --reinstall
 ```
-./mdbci setup-dependencies --reinstall
-````
 
-This will uninstall libvirt development package, vagrant and its plugins and destroy existing 'default' libvirt pool.
-
-If you have trouble using `./mdbci setup-dependencies` you can follow the [quickstart](docs/QUICKSTART.md) to install them manually.
+This will uninstall libvirt development packages, Terraform, Vagrant and its plugins and destroy existing 'default' libvirt pool.
 
 ## MDBCI usage
 
-MDBCI is the command-line utility that has a lots of commands and options. A full overview of them is available from the [CLI documentation](docs/cli_help.md) or from the `mdbci` using the `--help` flag: `./mdbci --help`.
+MDBCI is the command-line utility that has a lots of commands and options. Full overview of commands is available from the the `mdbci` using the `--help` flag: `mdbci --help`.
 
 The core steps required to create virtual machines using MDBCI are:
 
@@ -168,7 +177,7 @@ Each host description contains the `hostname` and `box` fields. The first one is
 
 You can get the list of boxes using the `./mdbci show platforms` command.
 
-Then each host is setup with the product. The products will be installed on the machines. The mandatory fields for each product is it's name and version that is required to be installed. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference). 
+Then each host is setup with the product. The products will be installed on the machines. The mandatory fields for each product is it's name and version that is required to be installed. You can install several products on one host, use the `products` field for it and describe the products list as array of json-objects (see `several_products_host` for reference).
 
 When installing a database you must also specify the name of the configuration file and the path to the folder where the file is stored. It is advised to use absolute path in `cnf_template_path` as the relative path is calculated from within the configuration directory.
 
