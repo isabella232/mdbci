@@ -20,4 +20,15 @@ module Result
   def self.error(error)
     Error.new(error)
   end
+
+  # Returns the first result that have succeeded.
+  # If not, then returns failed results
+  def self.any(*results)
+    result = results.find(&:success?)
+    if result.nil?
+      Result.error(results.map(&:error))
+    else
+      result
+    end
+  end
 end

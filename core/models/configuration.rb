@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'result'
+
 # Class represents the MDBCI configuration on the hard drive.
 class Configuration
   attr_reader :configuration_id
@@ -20,22 +22,34 @@ class Configuration
   # @param path [String] path that should be checked
   #
   # @returns [Boolean]
-  # rubocop:disable Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/PerceivedComplexity
   def self.config_directory?(path)
-    !path.nil? &&
-      !path.empty? &&
-      Dir.exist?(path) &&
-      File.exist?(File.join(path, 'template')) &&
-      File.exist?(File.join(path, 'provider')) &&
-      (
-        File.exist?(vagrant_configuration(path)) ||
-        File.exist?(docker_configuration(path)) ||
-        File.exist?(terraform_configuration(path))
+    return Result.error('Configuration path is not specified, nil') if path.nil?
+    return Result.error('Configuration path is empty') if path.empty?
+    return Result.error('Configuration directory does not exist') unless Dir.exist?(path)
+
+    file_exist?(template_file(path)).and_then do
+      file_exist?(provider_file(path))
+    end.and_then do
+      Result.any(
+        file_exist?(vagrant_configuration(path)),
+        file_exist?(docker_configuration(path)),
+        file_exist?(terraform_configuration(path))
       )
+    end.and_then do
+      Result.ok('Configuration is fine')
+    end
   end
-  # rubocop:enable Metrics/CyclomaticComplexity
-  # rubocop:enable Metrics/PerceivedComplexity
+
+  # Check that file exist
+  # @param file [String] path that should be checked
+  # @returns Result<String>
+  def self.file_exist?(file)
+    if File.exist?(path)
+      Result.ok("File #{file} exist")
+    else
+      Result.error("File '#{file}' does not exist in the configuration")
+    end
+  end
 
   # Returns all nodes for configuration.
   def all_node_names
@@ -69,6 +83,22 @@ class Configuration
     File.join(path, 'docker-configuration.yaml')
   end
 
+  # Forms the path to the template file file in the configuration specified by the path
+  #
+  # @param configuration_path [String] path to the configuration
+  # @return [String] path to the template file in the configuration
+  def self.template_file(configuration_path)
+    File.join(configuration_path, 'template')
+  end
+
+  # Forms the path to the provider file in the configuration directory
+  #
+  # @param configuration_path [String] path the configuration
+  # @return [String] path to the provider file in the configuration
+  def self.provider_file(configuration_path)
+    File.join(configuration_path, 'provider')
+  end
+
   # Create the configuration based on the path specification and labels list.
   #
   # Method returns Result that may contain the Configuration
@@ -80,7 +110,10 @@ class Configuration
 
   def initialize(spec, labels = nil)
     @path, node = parse_spec(spec)
-    raise ArgumentError, "Invalid path to the MDBCI configuration: #{spec}" unless self.class.config_directory?(@path)
+    check_result = self.class.config_directory?(@path)
+    if check_result.error?
+      raise ArgumentError, "Invalid path to the MDBCI configuration: #{check_result.error}"
+    end
 
     @name = File.basename(@path)
     @docker_network_name = "#{@name}_mdbci_config_bridge_network"
@@ -184,7 +217,8 @@ class Configuration
   # @param node [String] internal name of the machine specified in the template
   # @return [String] path to the products configurations directory.
   def cnf_template_path(node)
-    @node_configurations[node]['cnf_template_path'] || @node_configurations[node]['product']&.fetch('cnf_template_path', nil)
+    @node_configurations[node]['cnf_template_path'] ||
+      @node_configurations[node]['product']&.fetch('cnf_template_path', nil)
   end
 
   # Parse the products lists from configuration of node.
@@ -251,7 +285,9 @@ class Configuration
     end.keys
     raise(ArgumentError, 'Labels were not set in the template file') unless labels_set
 
-    raise(ArgumentError, "Unable to find nodes matching labels: #{@labels.join(', ')}") if node_names.empty?
+    if node_names.empty?
+      raise(ArgumentError, "Unable to find nodes matching labels: #{@labels.join(', ')}")
+    end
 
     node_names
   end
@@ -282,7 +318,7 @@ class Configuration
   # @return [String] name of the provider specified in the file.
   # @raise ArgumentError if there is no file or invalid provider specified.
   def read_provider(config_path)
-    provider_file_path = File.join(config_path, 'provider')
+    provider_file_path = self.class.provider_file(config_path)
     unless File.exist?(provider_file_path)
       raise ArgumentError, "There is no provider configuration specified in #{config_path}."
     end
@@ -295,7 +331,7 @@ class Configuration
     provider
   end
 
-  # Read the Docker Swarm full configuration file for futher processing
+  # Read the Docker Swarm full configuration file for further processing
   # If file does not present, return the empty string
   # @return [Hash] the processed hash
   def read_docker_configuration
@@ -311,7 +347,7 @@ class Configuration
   # @returns [String] path to the template path
   # @raise [ArgumentError] if there is an error during the file read
   def read_template_path(config_path)
-    template_file_name_path = File.join(config_path, 'template')
+    template_file_name_path = self.class.template_file(config_path)
     unless File.exist?(template_file_name_path)
       raise ArgumentError, "There is no template configuration specified in #{config_path}."
     end
@@ -325,7 +361,9 @@ class Configuration
   # @raise [ArgumentError] if the file does not exist
   # @return [Hash] data from the template JSON file
   def read_template(template_path)
-    raise ArgumentError, "The template #{template_path} does not exist." unless File.exist?(template_path)
+    unless File.exist?(template_path)
+      raise ArgumentError, "The template #{template_path} does not exist."
+    end
 
     JSON.parse(File.read(template_path))
   end
